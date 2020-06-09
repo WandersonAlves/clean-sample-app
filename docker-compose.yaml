@@ -1,0 +1,45 @@
+version: '3.4'
+
+x-service-template:
+  &template
+  command: bash -c "yarn dev"
+  working_dir: /usr/src/service
+  depends_on:
+    - start_dependencies
+  expose:
+    - 3200
+  environment:
+    - PORT=3200
+    - DB_HOST=postgres
+    - DB_PORT=5432
+    - DB_USER=postgres
+    - DB_PASS=docker
+
+services:
+
+  start_dependencies:
+    image: dadarek/wait-for-dependencies
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres
+    links:
+      - postgres
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=postgres
+    ports:
+      - 5432:5432
+
+  clean-service:
+    image: node:11
+    volumes:
+      - ./:/usr/src/service
+    ports:
+      - 9229:9229
+    links:
+      - postgres
+    << : *template
