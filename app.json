@@ -1,0 +1,10 @@
+{
+  "environments": {
+    "test": {
+      "scripts": {
+        "install": "yarn install",
+        "test": "yarn test"
+      }
+    }
+  }
+}
