@@ -10,6 +10,7 @@ import { IUserDTO } from '../entities/dtos/IUserDTO';
 import { OK, CREATED } from 'http-status';
 import AuthException from '../shared/exceptions/AuthException';
 import ExceptionHandler from '../shared/decorators/ExceptionHandler';
+import GenericException from '../shared/exceptions/GenericException';
 import HttpResponseFactory from '../presentation/factory/HttpResponseFactory';
 import InjectionReferences from '../container/inversify.references';
 
@@ -50,6 +51,11 @@ export default class AuthenticationCase {
       passwordHash: await bcrypt.hash(createUserDTO.password, 10),
     };
     const createdUser = await this.userRepo.create(userDTO);
+    if (!createdUser) {
+      return HttpResponseFactory.error(
+        new GenericException({ name: 'UserAlreadyExists', message: 'User already on db', statusCode: 500 }),
+      );
+    }
     return HttpResponseFactory.success(CREATED, createdUser);
   }
 }

@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import { IAuthorizationDTO } from '../entities/dtos/IAuthorizationDTO';
 import { IHttpResponse, IHttpError } from '../presentation/interfaces';
 import { logger } from '../shared/Logger';
-import { UNAUTHORIZED, OK } from 'http-status';
+import { UNAUTHORIZED, OK, CREATED } from 'http-status';
 import AuthenticationCase from './AuthenticationCase';
 import AuthException from '../shared/exceptions/AuthException';
 import container from '../container/inversify.config';
@@ -62,4 +62,26 @@ describe('Authentication Use Case', () => {
     expect(result.success).equal(true);
     expect(() => jwt.verify(result.body.token, 'random-secret')).to.not.throw();
   });
+
+  it('Should create a user', async () => {
+    _bindUserRepoMock();
+    const { statusCode, success } = await _getUseCase().createUser({
+      email: 'admin2@admin.com',
+      password: "1234",
+      name: 'admin'
+    });
+    expect(statusCode).equal(CREATED);
+    expect(success).equal(true);
+  });
+
+  it('Should not create a user if email exists', async () => {
+    _bindUserRepoMock();
+    const { statusCode, success } = await _getUseCase().createUser({
+      email: 'admin@admin.com',
+      password: '1234',
+      name: 'admin',
+    });
+    expect(statusCode).equal(500);
+    expect(success).equal(false);
+  })
 });

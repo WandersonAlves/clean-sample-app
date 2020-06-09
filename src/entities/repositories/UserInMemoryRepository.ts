@@ -2,6 +2,7 @@ import { DataRepository } from '../interfaces';
 import { injectable } from 'inversify';
 import { IUserDTO } from '../dtos/IUserDTO';
 import { TRestParameters } from '../../shared/types';
+import GenericException from '../../shared/exceptions/GenericException';
 
 @injectable()
 export default class UserInMemoryRepository implements DataRepository<IUserDTO> {
@@ -31,7 +32,12 @@ export default class UserInMemoryRepository implements DataRepository<IUserDTO> 
     return Promise.resolve(result);
   }
   create(obj: IUserDTO): Promise<IUserDTO> {
-    throw new Error('Method not implemented.');
+    console.log(obj.email);
+    if (this.users.find(u => u.email === obj.email)) {
+      return null;
+    }
+    this.users.push(obj);
+    return Promise.resolve(obj);
   }
   updateById(id: string | number, obj: Partial<IUserDTO>): Promise<IUserDTO> {
     this.users[id] = { ...this.users[id], ...obj };
